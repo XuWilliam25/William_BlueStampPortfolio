@@ -1,5 +1,5 @@
 # BlueStamp Fingerprint ID Safe with Keypad
-Replace this text with a brief description (2-3 sentences) of your project. This description should draw the reader in and make them interested in what you've built. You can include what the biggest challenges, takeaways, and triumphs from completing the project were. As you complete your portfolio, remember your audience is less familiar than you are with all that your project entails!
+My project is a safe that will require a fingerprint and password match to unlock.
 
 You should comment out all portions of your portfolio that you have not completed yet, as well as any instructions:
 ```HTML 
@@ -86,4 +86,4 @@ Don't forget to place the link of where to buy each component inside the quotati
 
 <iframe width="560" height="315" src="https://www.youtube.com/embed/CaCazFBhYKs" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
 
-For my starter project, I decided to choose the Retro Arcade Console.
+For my starter project, I decided to choose the Retro Arcade Console. It features four different game modes that you can play. The hardest part of completing this project was probably the soldering part because some of the holes were really small, making it easy to short-circuit.

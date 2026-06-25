@@ -60,15 +60,107 @@ Here's where you'll put images of your schematics. [Tinkercad](https://www.tinke
 Here's where you'll put your code. The syntax below places it into a block of code. Follow the guide [here]([url](https://www.markdownguide.org/extended-syntax/)) to learn how to customize it to your project needs. 
 
 ```c++
+#include <LiquidCrystal_I2C.h>
+#include <Wire.h>
+#include "Adafruit_Keypad.h"
+
+#define KEYPAD_PID3845
+#define R2    2
+#define R3    3
+#define C3    4
+#define R4    5
+#define C1    8
+#define R1    9
+#define C2    10
+
+#include "keypad_config.h"
+
+Adafruit_Keypad customKeypad = Adafruit_Keypad(makeKeymap(keys), rowPins, colPins, ROWS, COLS);
+LiquidCrystal_I2C lcd (0x27, 16, 2);
+
+// global variables
+String pwd = "";
+bool start_pressed = false;
+int attempts_left = 3;
+
 void setup() {
-  // put your setup code here, to run once:
   Serial.begin(9600);
-  Serial.println("Hello World!");
+  customKeypad.begin();
+  lcd.init();
+  lcd.backlight();
+  reset();
 }
 
 void loop() {
-  // put your main code here, to run repeatedly:
+  customKeypad.tick();
 
+  // read keys
+  while (customKeypad.available()) {
+    keypadEvent e = customKeypad.read();
+    if (e.bit.EVENT == KEY_JUST_PRESSED) {
+      char cur = (char)e.bit.KEY;
+      Serial.print("Key pressed: ");
+      Serial.println(cur);
+
+      if (cur == '*') {
+        start_pressed = true;
+        pwd = "";
+        lcd.clear();
+        lcd.setCursor(0, 0);
+        lcd.print("Enter Password:");
+      } 
+      else if (start_pressed && cur != '#') {
+        pwd += cur;
+        lcd.setCursor(pwd.length() - 1, 1);
+        lcd.print("*");
+
+        // Check if full password length is reached
+        if (pwd.length() == 4) {
+          checkPassword();
+        }
+      }
+    }
+  }
+  delay(10);
+}
+
+void checkPassword() {
+  lcd.clear();
+  lcd.setCursor(0, 0);
+  
+  if (pwd == "1234") {
+    lcd.print("Accepted");
+    lcd.setCursor(0, 1);
+    lcd.print("Scan Fingerprint");
+    // Fingerprint code
+    delay(3000);
+    reset();
+  } 
+  else {
+    attempts_left--;
+    lcd.print("Access Denied");
+    lcd.setCursor(0, 1);
+    lcd.print("Attempts Left: ");
+    lcd.print(attempts_left);
+    delay(2000);
+
+    if (attempts_left <= 0) {
+      lcd.clear();
+      lcd.setCursor(0, 0);
+      lcd.print("SYSTEM LOCKED");
+      while(true); // Locked forever
+    } else {
+      reset();
+    }
+  }
+}
+
+void reset() {
+  pwd = "";
+  start_pressed = false;
+  lcd.clear();
+  lcd.setCursor(0, 0);
+  lcd.print("Press * to Start");
 }
 ```
 

@@ -47,28 +47,30 @@ For your second milestone, explain what you've worked on since your previous mil
 
 <iframe width="560" height="315" src="https://www.youtube.com/embed/CaCazFBhYKs" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
 
-For your first milestone, describe what your project is and how you plan to build it. You can include:
-- An explanation about the different components of your project and how they will all integrate together
-- Technical progress you've made so far
-- Challenges you're facing and solving in your future milestones
-- What your plan is to complete your project
+For my first milestone, I wired up a keypad, fingerprint sensor, and lcd to an Arduino and coded it. The system starts off by asking you to enter the password. If you get the password wrong, you lose an attempt and have two more chances to get it right. If you run out of attempts, you are locked out until the safe turns off. If you get it correct, you are then prompted to scan your finger. If the system recognizes your fingerprint, then the safe unlocks. If it doesn't, you are asked to rescan your finger, and if you still get it wrong, you are locked out of the safe. The hardest part of creating this was probably getting my code to work and fixing any incorrect wirings. For my second milestone, I will likely wire up a servo motor that will physically open the safe and a button to save battery.
 
 # Schematics 
 Here's where you'll put images of your schematics. [Tinkercad](https://www.tinkercad.com/blog/official-guide-to-tinkercad-circuits) and [Fritzing](https://fritzing.org/learning/) are both great resoruces to create professional schematic diagrams, though BSE recommends Tinkercad becuase it can be done easily and for free in the browser. 
 
-# Code
-Here's where you'll put your code. The syntax below places it into a block of code. Follow the guide [here]([url](https://www.markdownguide.org/extended-syntax/)) to learn how to customize it to your project needs. 
+# Code 
 
 ```c++
 #include <LiquidCrystal_I2C.h>
 #include <Wire.h>
 #include "Adafruit_Keypad.h"
+#include <Adafruit_Fingerprint.h>
+
+#if (defined(__AVR__) || defined(ESP8266)) && !defined(__AVR_ATmega2560__)
+SoftwareSerial mySerial(2, 3);
+#else
+#define mySerial Serial1
+#endif
 
 #define KEYPAD_PID3845
-#define R2    2
-#define R3    3
-#define C3    4
-#define R4    5
+#define R2    4
+#define R3    5
+#define C3    6
+#define R4    7
 #define C1    8
 #define R1    9
 #define C2    10
@@ -77,8 +79,8 @@ Here's where you'll put your code. The syntax below places it into a block of co
 
 Adafruit_Keypad customKeypad = Adafruit_Keypad(makeKeymap(keys), rowPins, colPins, ROWS, COLS);
 LiquidCrystal_I2C lcd (0x27, 16, 2);
+Adafruit_Fingerprint finger = Adafruit_Fingerprint(&mySerial);
 
-// global variables
 String pwd = "";
 bool start_pressed = false;
 int attempts_left = 3;
@@ -88,6 +90,7 @@ void setup() {
   customKeypad.begin();
   lcd.init();
   lcd.backlight();
+  finger.begin(57600);
   reset();
 }
 
@@ -129,10 +132,42 @@ void checkPassword() {
   lcd.setCursor(0, 0);
   
   if (pwd == "1234") {
+    attempts_left = 3;
     lcd.print("Accepted");
     lcd.setCursor(0, 1);
     lcd.print("Scan Fingerprint");
-    // Fingerprint code
+    Serial.println("Waiting for valid finger...");
+    finger.getTemplateCount();
+    Serial.print("Sensor contains ");
+    Serial.print(finger.templateCount);
+    Serial.println(" templates");
+    int c = -1;
+    while (c == -1) {
+      c = getFingerprintID();
+      Serial.println(c);
+      delay(500);
+    }
+    if (c >= 75) {
+      finger_accepted();
+    } else {
+      lcd.clear();
+      lcd.print("No Match Found");
+      lcd.setCursor(0, 1);
+      lcd.print("Rescan Finger");
+      delay(2000);
+      c = -1;
+      while (c == -1) {
+        c = getFingerprintID();
+        Serial.println(c);
+        delay(500);
+      }
+      if (c >= 75) {
+        finger_accepted();
+      }
+      else {
+        permanently_locked();
+      }
+    }
     delay(3000);
     reset();
   } 
@@ -145,10 +180,7 @@ void checkPassword() {
     delay(2000);
 
     if (attempts_left <= 0) {
-      lcd.clear();
-      lcd.setCursor(0, 0);
-      lcd.print("SYSTEM LOCKED");
-      while(true); // Locked forever
+      permanently_locked();
     } else {
       reset();
     }
@@ -162,11 +194,93 @@ void reset() {
   lcd.setCursor(0, 0);
   lcd.print("Press * to Start");
 }
+
+int getFingerprintID() {
+  uint8_t p = finger.getImage();
+  switch (p) {
+  case FINGERPRINT_OK:
+    Serial.println("Image taken");
+    break;
+  case FINGERPRINT_NOFINGER:
+    Serial.println("No finger detected");
+    return -1;
+  case FINGERPRINT_PACKETRECIEVEERR:
+    Serial.println("Communication error");
+    return -1;
+  case FINGERPRINT_IMAGEFAIL:
+    Serial.println("Imaging error");
+    return -1;
+  default:
+    Serial.println("Unknown error");
+    return -1;
+  }
+
+  // OK success!
+
+  p = finger.image2Tz();
+  switch (p) {
+  case FINGERPRINT_OK:
+    Serial.println("Image converted");
+    break;
+  case FINGERPRINT_IMAGEMESS:
+    Serial.println("Image too messy");
+    return -1;
+  case FINGERPRINT_PACKETRECIEVEERR:
+    Serial.println("Communication error");
+    return -1;
+  case FINGERPRINT_FEATUREFAIL:
+    Serial.println("Could not find fingerprint features");
+    return -1;
+  case FINGERPRINT_INVALIDIMAGE:
+    Serial.println("Could not find fingerprint features");
+    return -1;
+  default:
+    Serial.println("Unknown error");
+    return -1;
+  }
+
+  // OK converted!
+  p = finger.fingerSearch();
+  if (p == FINGERPRINT_OK) {
+    Serial.println("Found a print match!");
+  } else if (p == FINGERPRINT_PACKETRECIEVEERR) {
+    Serial.println("Communication error");
+    return -1;
+  } else if (p == FINGERPRINT_NOTFOUND) {
+    Serial.println("Did not find a match");
+    return p;
+  } else {
+    Serial.println("Unknown error");
+    return -1;
+  }
+
+  // found a match!
+  Serial.print("Found ID #");
+  Serial.print(finger.fingerID);
+  Serial.print(" with confidence of ");
+  Serial.println(finger.confidence);
+
+  return (int)(finger.confidence);
+}
+
+void permanently_locked() {
+  lcd.clear();
+  lcd.setCursor(0, 0);
+  lcd.print("SYSTEM LOCKED");
+  while(true); // Locked forever
+}
+
+void finger_accepted() {
+  lcd.clear();
+  lcd.setCursor(0, 0);
+  lcd.print("Finger Accepted");
+  lcd.setCursor(0, 1);
+  lcd.print("Lockbox Opening");
+  while(true);
+}
 ```
 
-# Bill of Materials
-Here's where you'll list the parts in your project. To add more rows, just copy and paste the example rows below.
-Don't forget to place the link of where to buy each component inside the quotation marks in the corresponding row after href =. Follow the guide [here]([url](https://www.markdownguide.org/extended-syntax/)) to learn how to customize this to your project needs. 
+# Bill of Materials 
 
 | **Part** | **Note** | **Price** | **Link** |
 |:--:|:--:|:--:|:--:|

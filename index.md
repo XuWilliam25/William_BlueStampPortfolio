@@ -59,6 +59,7 @@ Here's where you'll put images of your schematics. [Tinkercad](https://www.tinke
 #include <Wire.h>
 #include "Adafruit_Keypad.h"
 #include <Adafruit_Fingerprint.h>
+#include <Servo.h>
 
 #if (defined(__AVR__) || defined(ESP8266)) && !defined(__AVR_ATmega2560__)
 SoftwareSerial mySerial(2, 3);
@@ -77,6 +78,7 @@ SoftwareSerial mySerial(2, 3);
 
 #include "keypad_config.h"
 
+Servo myservo;
 Adafruit_Keypad customKeypad = Adafruit_Keypad(makeKeymap(keys), rowPins, colPins, ROWS, COLS);
 LiquidCrystal_I2C lcd (0x27, 16, 2);
 Adafruit_Fingerprint finger = Adafruit_Fingerprint(&mySerial);
@@ -84,6 +86,7 @@ Adafruit_Fingerprint finger = Adafruit_Fingerprint(&mySerial);
 String pwd = "";
 bool start_pressed = false;
 int attempts_left = 3;
+int servo_pos = 0;
 
 void setup() {
   Serial.begin(9600);
@@ -91,12 +94,13 @@ void setup() {
   lcd.init();
   lcd.backlight();
   finger.begin(57600);
+  myservo.attach(11);
   reset();
 }
 
 void loop() {
+  myservo.write(0);
   customKeypad.tick();
-
   // read keys
   while (customKeypad.available()) {
     keypadEvent e = customKeypad.read();
@@ -276,7 +280,33 @@ void finger_accepted() {
   lcd.print("Finger Accepted");
   lcd.setCursor(0, 1);
   lcd.print("Lockbox Opening");
-  while(true);
+  delay(15);
+  for (servo_pos = 0; servo_pos <= 90; servo_pos++) {
+    myservo.write(servo_pos);
+    delay(15);
+  }
+  lcd.clear();
+  lcd.setCursor(0, 0);
+  lcd.print("Lockbox Open");
+  lcd.setCursor(0, 1);
+  lcd.print("Press # to Close");
+  while (true) {
+    customKeypad.tick();
+    if (customKeypad.available()) {
+      keypadEvent e = customKeypad.read();
+      if ((e.bit.EVENT == KEY_JUST_PRESSED) && ((char)e.bit.KEY == '#')) {
+        for (servo_pos = 90; servo_pos >= 0; servo_pos--) {
+          myservo.write(servo_pos);
+          delay(15);
+        }
+        lcd.clear();
+        lcd.setCursor(0, 0);
+        lcd.print("Lockbox Closed");
+        delay(750);
+        break;
+      }
+    }
+  }
 }
 ```
 

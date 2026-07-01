@@ -324,6 +324,6 @@ void finger_accepted() {
 
 # Starter Project
 
-<iframe width="560" height="315" src="https://www.youtube.com/embed/CaCazFBhYKs" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+<iframe width="1053" height="592" src="https://www.youtube.com/embed/x7NOztviujc" title="William X. Starter Project" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
 
 For my starter project, I decided to choose the Retro Arcade Console. It features four different game modes that you can play. The hardest part of completing this project was probably the soldering part because some of the holes were really small, making it easy to short-circuit.

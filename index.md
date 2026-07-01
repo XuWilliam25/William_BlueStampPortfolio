@@ -318,11 +318,11 @@ void finger_accepted() {
 | Breadboard | Used to wire devices to the Arduino | $8.99 | <a href="https://www.amazon.com/EL-CP-003-Breadboard-Solderless-Distribution-Connecting/dp/B01EV6LJ7G/"> Link </a> |
 | Keypad | Used to input the password | $6.50 | <a href="https://www.adafruit.com/product/3845?srsltid=AfmBOop0mFDCKUcpbJfNziJJQCqdIGndAFKcya28DPK7Vt_bTC7mqKFMPDg"> Link </a> |
 | Fingerprint Sensor | Used to scan user's fingerprint | €36,19 | <a href="https://www.amazon.com.be/-/en/Fingerprint-Identification-Capacitive-Recognition-Assistance/dp/B08GKY4RK1?language=en_GB"> Link </a> |
-| Liquid Crystal Display Screen | Used to display messages outputted from the code | $12.99 | <a href="https://www.amazon.com/Hosyond-Display-Module-Arduino-Raspberry/dp/B0BWTFN9WF/?th=1"> Link </a> |
-| Servo Motor | Used to open the lockbox | $17.98 | <a href="https://www.amazon.com/Hosyond-Display-Module-Arduino-Raspberry/dp/B0BWTFN9WF/?th=1"> Link </a> |
-| Switch | Used to turn the lockbox on and off | $6.39 | <a href="https://www.amazon.com/Hosyond-Display-Module-Arduino-Raspberry/dp/B0BWTFN9WF/?th=1"> Link </a> |
-| Battery Holder | Used to hold AA batteries | $3.95 | <a href="https://www.amazon.com/Hosyond-Display-Module-Arduino-Raspberry/dp/B0BWTFN9WF/?th=1"> Link </a> |
-| AA Batteries | Used to power the lockbox | $6.49 | <a href="https://www.amazon.com/Hosyond-Display-Module-Arduino-Raspberry/dp/B0BWTFN9WF/?th=1"> Link </a> |
+| Liquid Crystal Display Screen | Used to display messages outputted from the code | $12.99 | <a href="https://www.amazon.com/Hosyond-Display-Module-Arduino-Raspberry/dp/B0BWTFN9WF/"> Link </a> |
+| Servo Motor | Used to open the lockbox | $13.98 | <a href="https://www.amazon.com/Deegoo-FPV-Servo-MG995-Metal-Gear/dp/B07NQJ1VZ2/"> Link </a> |
+| Switch | Used to turn the lockbox on and off | $6.39 | <a href="https://www.amazon.com/DaierTek-Listed-Switches-Automotive-KCD1-5Pack/dp/B07S1MV462/"> Link </a> |
+| Battery Holder | Used to hold AA batteries | $3.95 | <a href="https://www.amazon.com/Battery-Spring-Holder-Plastic-Storage/dp/B072FBL5HG/"> Link </a> |
+| AA Batteries | Used to power the lockbox | $6.49 | <a href="https://www.amazon.com/Amazon-Basics-Batteries-Leak-Free-Household/dp/B00O869KJE/"> Link </a> |
 
 # Starter Project
 

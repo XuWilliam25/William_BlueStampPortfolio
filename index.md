@@ -1,5 +1,5 @@
 # BlueStamp Fingerprint ID Safe with Keypad
-My project is a safe that will require a fingerprint and password match to unlock.
+For my intensive project, I decided to build a lockbox to store my valuables. It features a password keypad, fingerprint sensor, and mobile app. There are two ways to unlock the safe: either correctly enter the password and scan your fingerprint on the lockbox console, or use the face ID feature on your phone to directly unlock the safe.
 
 You should comment out all portions of your portfolio that you have not completed yet, as well as any instructions:
 ```HTML 
@@ -351,4 +351,4 @@ void finger_accepted() {
 
 <iframe width="560" height="315" src="https://www.youtube.com/embed/x7NOztviujc" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
 
-For my starter project, I decided to choose the Retro Arcade Console. It features four different game modes that you can play. The hardest part of completing this project was probably the soldering part because some of the holes were really small, making it easy to short-circuit.
+For my starter project, I decided to choose the Retro Arcade Console. It features four different game modes that you can play: Tetris, Snake, Racing, and Slot. The hardest part of completing this project for me was soldering because some of the holes were really small, making it easy to create an accidental short circuit.

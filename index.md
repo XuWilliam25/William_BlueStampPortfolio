@@ -54,13 +54,16 @@ For my first milestone, I wired up a keypad, fingerprint sensor, and lcd to an A
 <br>
 **Figure 1 - Keypad Wiring**
 <br>
+<br>
 ![Button Wiring](button_wiring.jpg)
 <br>
 **Figure 2 - Button Wiring**
 <br>
+<br>
 ![LCD Wiring](lcd_wiring.jpg)
 <br>
 **Figure 3 - LCD Wiring**
+<br>
 <br>
 ![Servo Motor Wiring](servo_wiring.jpg)
 <br>

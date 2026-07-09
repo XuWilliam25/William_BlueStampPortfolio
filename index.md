@@ -78,73 +78,92 @@ For my first milestone, I wired up a keypad, fingerprint sensor, and lcd to an A
 # Code 
 
 ```c++
-#include <LiquidCrystal_I2C.h>
 #include <Wire.h>
+#include <LiquidCrystal_I2C.h>
 #include "Adafruit_Keypad.h"
 #include <Adafruit_Fingerprint.h>
 #include <Servo.h>
-
-#if (defined(__AVR__) || defined(ESP8266)) && !defined(__AVR_ATmega2560__)
-SoftwareSerial mySerial(2, 3);
-#else
-#define mySerial Serial1
-#endif
-
 #define KEYPAD_PID3845
-#define R2    4
-#define R3    5
-#define C3    6
-#define R4    7
-#define C1    8
-#define R1    9
-#define C2    10
-
+#define R2 4
+#define R3 5
+#define C3 6
+#define R4 7
+#define C1 8
+#define R1 9
+#define C2 10
 #include "keypad_config.h"
-
 Servo myservo;
 Adafruit_Keypad customKeypad = Adafruit_Keypad(makeKeymap(keys), rowPins, colPins, ROWS, COLS);
-LiquidCrystal_I2C lcd (0x27, 16, 2);
-Adafruit_Fingerprint finger = Adafruit_Fingerprint(&mySerial);
-
+LiquidCrystal_I2C lcd(0x27, 16, 2);
+Adafruit_Fingerprint finger = Adafruit_Fingerprint(&Serial1);
 String pwd = "";
 bool start_pressed = false;
 int attempts_left = 3;
 int servo_pos = 0;
-
 void setup() {
   Serial.begin(9600);
-  customKeypad.begin();
+  delay(500);
+  Serial.println("---SYSTEM STARTING---");
+  Wire.begin();
+  Wire.setClock(100000);
+  delay(100);
   lcd.init();
   lcd.backlight();
+  lcd.clear();
+  lcd.print("Starting Up...");
+  Serial.println("LCD initialized");
+  customKeypad.begin();
+  Serial.println("Keypad initialized");
+  Serial1.begin(57600);
+  while (!Serial1);
   finger.begin(57600);
-  myservo.attach(11);
+  delay(3000); 
+  
+  while (Serial1.available() > 0) {
+    Serial1.read();
+  }
+  
+  
+
+  delay(200);
+  lcd.clear();
+  if (finger.verifyPassword()) {
+    Serial.println("Fingerprint sensor initialized");
+  } else {
+    Serial1.end();
+    delay(500);
+    Serial1.begin(57600);
+    delay(500);
+    while (Serial1.available() > 0) {
+      Serial1.read();
+    }
+    if (finger.verifyPassword()) {
+      Serial.println("Fingerprint sensor initialized");
+    } else {
+      Serial.println("ERROR: Fingerprint sensor not found");
+      delay(2000);
+    }
+  }
+  delay(1000);
   reset();
 }
-
 void loop() {
-  myservo.write(0);
   customKeypad.tick();
-  // read keys
   while (customKeypad.available()) {
     keypadEvent e = customKeypad.read();
     if (e.bit.EVENT == KEY_JUST_PRESSED) {
       char cur = (char)e.bit.KEY;
       Serial.print("Key pressed: ");
       Serial.println(cur);
-
       if (cur == '*') {
         start_pressed = true;
         pwd = "";
         lcd.clear();
-        lcd.setCursor(0, 0);
         lcd.print("Enter Password:");
-      } 
-      else if (start_pressed && cur != '#') {
+      } else if (start_pressed && cur != '#') {
         pwd += cur;
         lcd.setCursor(pwd.length() - 1, 1);
         lcd.print("*");
-
-        // Check if full password length is reached
         if (pwd.length() == 4) {
           checkPassword();
         }
@@ -153,30 +172,43 @@ void loop() {
   }
   delay(10);
 }
-
 void checkPassword() {
   lcd.clear();
   lcd.setCursor(0, 0);
-  
   if (pwd == "1234") {
     attempts_left = 3;
     lcd.print("Accepted");
     lcd.setCursor(0, 1);
     lcd.print("Scan Fingerprint");
-    Serial.println("Waiting for valid finger...");
-    finger.getTemplateCount();
-    Serial.print("Sensor contains ");
-    Serial.print(finger.templateCount);
-    Serial.println(" templates");
+    Serial.println("Password accepted, scan fingerprint now");
+    int template_status = finger.getTemplateCount();
+    if (template_status == FINGERPRINT_OK) {
+      Serial.print("Sensor connection verified. Templates found: ");
+      Serial.println(finger.templateCount);
+    } else {
+      Serial.println("ERROR: Sensor failed to return template count.");
+    }
+    finger.LEDcontrol(FINGERPRINT_LED_FLASHING, 25, FINGERPRINT_LED_PURPLE, 0);
+    delay(100);
     int c = -1;
+    unsigned long scanStartTime = millis();
     while (c == -1) {
       c = getFingerprintID();
+      Serial.print("Scan status: ");
       Serial.println(c);
       delay(500);
+      if (millis() - scanStartTime > 20000) {
+        Serial.println("Fingerprint scan timed out.");
+        finger.LEDcontrol(FINGERPRINT_LED_OFF, 0, 0, 0);
+        lcd.clear();
+        lcd.print("Timed Out");
+        delay(2000);
+        break;
+      }
     }
     if (c >= 75) {
       finger_accepted();
-    } else {
+    } else if (c != -1) {
       lcd.clear();
       lcd.print("No Match Found");
       lcd.setCursor(0, 1);
@@ -185,27 +217,25 @@ void checkPassword() {
       c = -1;
       while (c == -1) {
         c = getFingerprintID();
+        Serial.print("Scan status: ");
         Serial.println(c);
         delay(500);
       }
       if (c >= 75) {
         finger_accepted();
-      }
-      else {
+      } else {
         permanently_locked();
       }
     }
-    delay(3000);
+    delay(2000);
     reset();
-  } 
-  else {
+  } else {
     attempts_left--;
     lcd.print("Access Denied");
     lcd.setCursor(0, 1);
     lcd.print("Attempts Left: ");
     lcd.print(attempts_left);
     delay(2000);
-
     if (attempts_left <= 0) {
       permanently_locked();
     } else {
@@ -213,103 +243,69 @@ void checkPassword() {
     }
   }
 }
-
 void reset() {
   pwd = "";
   start_pressed = false;
   lcd.clear();
-  lcd.setCursor(0, 0);
   lcd.print("Press * to Start");
 }
-
 int getFingerprintID() {
+  delay(10);
+  while(Serial1.available() > 0) { 
+    Serial1.read();
+  }
   uint8_t p = finger.getImage();
-  switch (p) {
-  case FINGERPRINT_OK:
-    Serial.println("Image taken");
-    break;
-  case FINGERPRINT_NOFINGER:
-    Serial.println("No finger detected");
-    return -1;
-  case FINGERPRINT_PACKETRECIEVEERR:
-    Serial.println("Communication error");
-    return -1;
-  case FINGERPRINT_IMAGEFAIL:
-    Serial.println("Imaging error");
-    return -1;
-  default:
-    Serial.println("Unknown error");
+  if (p == FINGERPRINT_NOFINGER) {
     return -1;
   }
-
-  // OK success!
-
+  if (p == FINGERPRINT_PACKETRECIEVEERR) {
+    return -1;
+  }
+  if (p != FINGERPRINT_OK) {
+    return -1;
+  }
+  Serial.println("Image successfully taken!");
+  delay(20);
   p = finger.image2Tz();
-  switch (p) {
-  case FINGERPRINT_OK:
-    Serial.println("Image converted");
-    break;
-  case FINGERPRINT_IMAGEMESS:
-    Serial.println("Image too messy");
-    return -1;
-  case FINGERPRINT_PACKETRECIEVEERR:
-    Serial.println("Communication error");
-    return -1;
-  case FINGERPRINT_FEATUREFAIL:
-    Serial.println("Could not find fingerprint features");
-    return -1;
-  case FINGERPRINT_INVALIDIMAGE:
-    Serial.println("Could not find fingerprint features");
-    return -1;
-  default:
-    Serial.println("Unknown error");
+  if (p != FINGERPRINT_OK) {
+    Serial.println("Failed to convert image features.");
     return -1;
   }
-
-  // OK converted!
+  delay(20);
   p = finger.fingerSearch();
   if (p == FINGERPRINT_OK) {
-    Serial.println("Found a print match!");
-  } else if (p == FINGERPRINT_PACKETRECIEVEERR) {
-    Serial.println("Communication error");
-    return -1;
+    Serial.print("Match Found! ID #");
+    Serial.print(finger.fingerID);
+    Serial.print(" with confidence score of ");
+    Serial.println(finger.confidence);
+    return (int)(finger.confidence);
   } else if (p == FINGERPRINT_NOTFOUND) {
-    Serial.println("Did not find a match");
-    return p;
-  } else {
-    Serial.println("Unknown error");
-    return -1;
+    Serial.println("Fingerprint does not match stored database.");
+    return 0;
   }
-
-  // found a match!
-  Serial.print("Found ID #");
-  Serial.print(finger.fingerID);
-  Serial.print(" with confidence of ");
-  Serial.println(finger.confidence);
-
-  return (int)(finger.confidence);
+  return -1;
 }
-
 void permanently_locked() {
   lcd.clear();
-  lcd.setCursor(0, 0);
   lcd.print("SYSTEM LOCKED");
-  while(true); // Locked forever
+  while(true);
 }
-
 void finger_accepted() {
+  finger.LEDcontrol(FINGERPRINT_LED_OFF, 0, 0, 0);
   lcd.clear();
-  lcd.setCursor(0, 0);
   lcd.print("Finger Accepted");
   lcd.setCursor(0, 1);
   lcd.print("Lockbox Opening");
+  delay(15);
+  myservo.attach(11);
+  myservo.write(0);
+  Serial.println("Servo initialized");
   delay(15);
   for (servo_pos = 0; servo_pos <= 90; servo_pos++) {
     myservo.write(servo_pos);
     delay(15);
   }
   lcd.clear();
-  lcd.setCursor(0, 0);
   lcd.print("Lockbox Open");
   lcd.setCursor(0, 1);
   lcd.print("Press # to Close");
@@ -318,12 +314,13 @@ void finger_accepted() {
     if (customKeypad.available()) {
       keypadEvent e = customKeypad.read();
       if ((e.bit.EVENT == KEY_JUST_PRESSED) && ((char)e.bit.KEY == '#')) {
+        Serial.println("Closing Servo");
         for (servo_pos = 90; servo_pos >= 0; servo_pos--) {
           myservo.write(servo_pos);
           delay(15);
         }
+        myservo.detach(); 
         lcd.clear();
-        lcd.setCursor(0, 0);
         lcd.print("Lockbox Closed");
         delay(750);
         break;

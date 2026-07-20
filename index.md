@@ -74,11 +74,15 @@ For my first milestone, I wired up a keypad, fingerprint sensor, and lcd to an A
 # Code 
 
 ```c++
+#define BLYNK_TEMPLATE_ID "TMPL2Xyd2VK25"
+#define BLYNK_TEMPLATE_NAME "Lockbox App"
+#define BLYNK_AUTH_TOKEN "b2kzKvsd_BsLOTSZLCVM-jGbtlZcwPR3"
 #include <Wire.h>
 #include <LiquidCrystal_I2C.h>
+#include <WiFiS3.h>
+#include <BlynkSimpleWifi.h>
 #include "Adafruit_Keypad.h"
 #include <Adafruit_Fingerprint.h>
-#include <Servo.h>
 #define KEYPAD_PID3845
 #define R2 4
 #define R3 5
@@ -88,18 +92,98 @@ For my first milestone, I wired up a keypad, fingerprint sensor, and lcd to an A
 #define R1 9
 #define C2 10
 #include "keypad_config.h"
-Servo myservo;
+const int SERVO_PIN = 11;
 Adafruit_Keypad customKeypad = Adafruit_Keypad(makeKeymap(keys), rowPins, colPins, ROWS, COLS);
 LiquidCrystal_I2C lcd(0x27, 16, 2);
 Adafruit_Fingerprint finger = Adafruit_Fingerprint(&Serial1);
+char auth[] = BLYNK_AUTH_TOKEN;
+char ssid[] = "J11";
+char pass[] = "Blue@J11";
 String pwd = "";
 bool start_pressed = false;
+bool password_authenticated = false;
+bool is_open = false;
+bool blynk_action_triggered = false;
 int attempts_left = 3;
-int servo_pos = 0;
+
+void reset();
+
+void physical_open() {
+  if (!is_open) {
+    Serial.println("Driving Servo safely to OPEN (45 degrees)...");
+    for (int i = 0; i < 20; i++) {
+      digitalWrite(SERVO_PIN, HIGH);
+      delayMicroseconds(1000);
+      digitalWrite(SERVO_PIN, LOW);
+      delay(20);
+    }
+    is_open = true;
+    lcd.clear();
+    lcd.print("Box Open. To Lock");
+  }
+}
+void physical_close() {
+  if (is_open) {
+    Serial.println("Driving Servo safely to CLOSED (135 degrees)...");
+    for (int i = 0; i < 20; i++) {
+      digitalWrite(SERVO_PIN, HIGH);
+      delayMicroseconds(2000);
+      digitalWrite(SERVO_PIN, LOW);
+      delay(20);
+    }
+    digitalWrite(SERVO_PIN, LOW);
+    is_open = false;
+    lcd.clear();
+    lcd.print("Lockbox Closed");
+  }
+}
+BLYNK_CONNECTED() {
+  Blynk.virtualWrite(V1, 0);
+  Serial.println("System started: Blynk switch forced to 0.");
+}
+BLYNK_WRITE(V1) {
+  int switchState = param.asInt();
+  if (!password_authenticated) {
+    if (switchState == 1) {
+      Serial.println("SECURITY WARNING: Blynk bypass blocked.");
+      lcd.clear();
+      lcd.print("To Open Enter");
+      lcd.setCursor(0, 1);
+      lcd.print("Pwd on Keypad");
+      delay(2000);
+      Blynk.virtualWrite(V1, 0);
+      reset();
+    }
+    return;
+  }
+  if (switchState == 1) {
+    Serial.println("Blynk App Action: Open requested.");
+    blynk_action_triggered = true;
+    physical_open();
+    lcd.setCursor(0, 1);
+    lcd.print("Use App/Press #");
+  } else {
+    if (blynk_action_triggered && is_open) {
+      Serial.println("Blynk App Action: Close requested via phone switch.");
+      physical_close();
+      password_authenticated = false;
+    }
+  }
+}
 void setup() {
-  Serial.begin(9600);
+  Serial.begin(115200);
   delay(500);
   Serial.println("---SYSTEM STARTING---");
+  pinMode(SERVO_PIN, OUTPUT);
+  // Set servo to default closed position upon startup
+  for (int i = 0; i < 15; i++) {
+    digitalWrite(SERVO_PIN, HIGH);
+    delayMicroseconds(2000);
+    digitalWrite(SERVO_PIN, LOW);
+    delay(20);
+  }
+  digitalWrite(SERVO_PIN, LOW);
+  is_open = false;
   Wire.begin();
   Wire.setClock(100000);
   delay(100);
@@ -107,20 +191,15 @@ void setup() {
   lcd.backlight();
   lcd.clear();
   lcd.print("Starting Up...");
-  Serial.println("LCD initialized");
   customKeypad.begin();
-  Serial.println("Keypad initialized");
   Serial1.begin(57600);
   while (!Serial1);
+  Serial1.flush();
   finger.begin(57600);
-  delay(3000); 
-  
+  delay(3000);
   while (Serial1.available() > 0) {
     Serial1.read();
   }
-  
-  
-
   delay(200);
   lcd.clear();
   if (finger.verifyPassword()) {
@@ -129,6 +208,7 @@ void setup() {
     Serial1.end();
     delay(500);
     Serial1.begin(57600);
+    Serial1.flush();
     delay(500);
     while (Serial1.available() > 0) {
       Serial1.read();
@@ -137,20 +217,19 @@ void setup() {
       Serial.println("Fingerprint sensor initialized");
     } else {
       Serial.println("ERROR: Fingerprint sensor not found");
-      delay(2000);
     }
   }
-  delay(1000);
+  Blynk.begin(auth, ssid, pass);
+  delay(200);
   reset();
 }
 void loop() {
+  Blynk.run();
   customKeypad.tick();
   while (customKeypad.available()) {
     keypadEvent e = customKeypad.read();
     if (e.bit.EVENT == KEY_JUST_PRESSED) {
       char cur = (char)e.bit.KEY;
-      Serial.print("Key pressed: ");
-      Serial.println(cur);
       if (cur == '*') {
         start_pressed = true;
         pwd = "";
@@ -159,6 +238,7 @@ void loop() {
       } else if (start_pressed && cur != '#') {
         pwd += cur;
         lcd.setCursor(pwd.length() - 1, 1);
+        pwd += "";
         lcd.print("*");
         if (pwd.length() == 4) {
           checkPassword();
@@ -173,57 +253,73 @@ void checkPassword() {
   lcd.setCursor(0, 0);
   if (pwd == "1234") {
     attempts_left = 3;
-    lcd.print("Accepted");
+    password_authenticated = true;
+    blynk_action_triggered = false;
+    lcd.print("Accepted. Scan");
     lcd.setCursor(0, 1);
-    lcd.print("Scan Fingerprint");
-    Serial.println("Password accepted, scan fingerprint now");
-    int template_status = finger.getTemplateCount();
-    if (template_status == FINGERPRINT_OK) {
-      Serial.print("Sensor connection verified. Templates found: ");
-      Serial.println(finger.templateCount);
-    } else {
-      Serial.println("ERROR: Sensor failed to return template count.");
-    }
+    lcd.print("Finger/Use App");
+    Serial.println("Password accepted. Session active.");
     finger.LEDcontrol(FINGERPRINT_LED_FLASHING, 25, FINGERPRINT_LED_PURPLE, 0);
     delay(100);
-    int c = -1;
-    unsigned long scanStartTime = millis();
-    while (c == -1) {
-      c = getFingerprintID();
-      Serial.print("Scan status: ");
-      Serial.println(c);
-      delay(500);
-      if (millis() - scanStartTime > 20000) {
-        Serial.println("Fingerprint scan timed out.");
-        finger.LEDcontrol(FINGERPRINT_LED_OFF, 0, 0, 0);
-        lcd.clear();
-        lcd.print("Timed Out");
-        delay(2000);
+    unsigned long sessionStartTime = millis();
+    while (password_authenticated) {
+      Blynk.run();
+      customKeypad.tick();
+      // FINGERPRINT BRANCH
+      if (!blynk_action_triggered) {
+        int c = getFingerprintID();
+        if (c >= 75) {
+          Serial.println("Fingerprint verified.");
+          finger.LEDcontrol(FINGERPRINT_LED_OFF, 0, 0, 0);
+          physical_open();
+          lcd.setCursor(0, 1);
+          lcd.print("Press # to Close");
+          while (true) {
+            customKeypad.tick();
+            if (customKeypad.available()) {
+              keypadEvent ke = customKeypad.read();
+              if ((ke.bit.EVENT == KEY_JUST_PRESSED) && ((char)ke.bit.KEY == '#')) {
+                physical_close();
+                break;
+              }
+            }
+          }
+          password_authenticated = false;
+          break;
+        } else if (c != -1 && c < 75) {
+          lcd.clear();
+          lcd.print("No Match Found");
+          delay(1500);
+          lcd.clear();
+          lcd.print("Scan or Use App");
+        }
+      }
+      // KEYPAD OVERRIDE
+      while (customKeypad.available()) {
+        keypadEvent ke = customKeypad.read();
+        if ((ke.bit.EVENT == KEY_JUST_PRESSED) && ((char)ke.bit.KEY == '#')) {
+          Serial.println("Session closed via physical Keypad override.");
+          if (is_open) {
+            physical_close();
+            Blynk.virtualWrite(V1, 0);
+            delay(500);
+          }
+          password_authenticated = false;
+          break;
+        }
+      }
+      if (millis() - sessionStartTime > 60000) {
+        Serial.println("Session timeout.");
+        if (is_open) {
+          physical_close();
+          Blynk.virtualWrite(V1, 0);
+        }
         break;
       }
+      delay(50);
     }
-    if (c >= 75) {
-      finger_accepted();
-    } else if (c != -1) {
-      lcd.clear();
-      lcd.print("No Match Found");
-      lcd.setCursor(0, 1);
-      lcd.print("Rescan Finger");
-      delay(2000);
-      c = -1;
-      while (c == -1) {
-        c = getFingerprintID();
-        Serial.print("Scan status: ");
-        Serial.println(c);
-        delay(500);
-      }
-      if (c >= 75) {
-        finger_accepted();
-      } else {
-        permanently_locked();
-      }
-    }
-    delay(2000);
+    finger.LEDcontrol(FINGERPRINT_LED_OFF, 0, 0, 0);
+    delay(500);
     reset();
   } else {
     attempts_left--;
@@ -242,41 +338,24 @@ void checkPassword() {
 void reset() {
   pwd = "";
   start_pressed = false;
+  password_authenticated = false;
+  blynk_action_triggered = false;
   lcd.clear();
   lcd.print("Press * to Start");
 }
 int getFingerprintID() {
-  delay(10);
-  while(Serial1.available() > 0) { 
-    Serial1.read();
-  }
   uint8_t p = finger.getImage();
-  if (p == FINGERPRINT_NOFINGER) {
-    return -1;
-  }
-  if (p == FINGERPRINT_PACKETRECIEVEERR) {
-    return -1;
-  }
-  if (p != FINGERPRINT_OK) {
-    return -1;
-  }
-  Serial.println("Image successfully taken!");
+  if (p == FINGERPRINT_NOFINGER) return -1;
+  if (p == FINGERPRINT_PACKETRECIEVEERR) return -1;
+  if (p != FINGERPRINT_OK) return -1;
   delay(20);
   p = finger.image2Tz();
-  if (p != FINGERPRINT_OK) {
-    Serial.println("Failed to convert image features.");
-    return -1;
-  }
+  if (p != FINGERPRINT_OK) return -1;
   delay(20);
   p = finger.fingerSearch();
   if (p == FINGERPRINT_OK) {
-    Serial.print("Match Found! ID #");
-    Serial.print(finger.fingerID);
-    Serial.print(" with confidence score of ");
-    Serial.println(finger.confidence);
     return (int)(finger.confidence);
   } else if (p == FINGERPRINT_NOTFOUND) {
-    Serial.println("Fingerprint does not match stored database.");
     return 0;
   }
   return -1;
@@ -285,44 +364,6 @@ void permanently_locked() {
   lcd.clear();
   lcd.print("SYSTEM LOCKED");
   while(true);
-}
-void finger_accepted() {
-  finger.LEDcontrol(FINGERPRINT_LED_OFF, 0, 0, 0);
-  lcd.clear();
-  lcd.print("Finger Accepted");
-  lcd.setCursor(0, 1);
-  lcd.print("Lockbox Opening");
-  delay(15);
-  myservo.attach(11);
-  myservo.write(0);
-  Serial.println("Servo initialized");
-  delay(15);
-  for (servo_pos = 0; servo_pos <= 90; servo_pos++) {
-    myservo.write(servo_pos);
-    delay(15);
-  }
-  lcd.clear();
-  lcd.print("Lockbox Open");
-  lcd.setCursor(0, 1);
-  lcd.print("Press # to Close");
-  while (true) {
-    customKeypad.tick();
-    if (customKeypad.available()) {
-      keypadEvent e = customKeypad.read();
-      if ((e.bit.EVENT == KEY_JUST_PRESSED) && ((char)e.bit.KEY == '#')) {
-        Serial.println("Closing Servo");
-        for (servo_pos = 90; servo_pos >= 0; servo_pos--) {
-          myservo.write(servo_pos);
-          delay(15);
-        }
-        myservo.detach(); 
-        lcd.clear();
-        lcd.print("Lockbox Closed");
-        delay(750);
-        break;
-      }
-    }
-  }
 }
 ```
 

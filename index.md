@@ -33,7 +33,7 @@ For your final milestone, explain the outcome of your project. Key details to in
 
 **Don't forget to replace the text below with the embedding for your milestone video. Go to Youtube, click Share -> Embed, and copy and paste the code to replace what's below.**
 
-
+<iframe width="560" height="315" src="https://www.youtube.com/embed/YcQ7PkH5qnI" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
 
 For my second milestone, I wired up a servo motor to my Arduino and organized the wires a bit. However, as soon as I transferred everything over to the Arduino R4, my fingerprint sensor stopped working, which I spent two weeks trying to fix. After that, I synced the Arduino R4 with Blynk so that I could open the lockbox from my phone (in case something goes wrong with the fingerprint sensor). How the Blynk system works is, there's a button in the app that's connected to a datastream, essentially a variable, on the website. When you click the button once, it changes the value of the datastream from 0 to 1 and sends a message to the Arduino, allowing the servo to rotate. When you click it again, the value changes back to 0, prompting it to rotate back to its initial position. For my final milestone, I plan to fix any bugs that still exist, add a switch to turn the box on and off without being connected to my computer, and drill everything into the actual box.
 

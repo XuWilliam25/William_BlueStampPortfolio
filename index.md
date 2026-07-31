@@ -17,29 +17,17 @@ You should comment out all portions of your portfolio that you have not complete
   
 # Final Milestone
 
-**Don't forget to replace the text below with the embedding for your milestone video. Go to Youtube, click Share -> Embed, and copy and paste the code to replace what's below.**
+<iframe width="560" height="315" src="https://www.youtube.com/embed/8KN960_h9_0" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
 
-
-
-For your final milestone, explain the outcome of your project. Key details to include are:
-- What you've accomplished since your previous milestone
-- What your biggest challenges and triumphs were at BSE
-- A summary of key topics you learned about
-- What you hope to learn in the future after everything you've learned at BSE
-
-
+For my final milestone, 
 
 # Second Milestone
-
-**Don't forget to replace the text below with the embedding for your milestone video. Go to Youtube, click Share -> Embed, and copy and paste the code to replace what's below.**
 
 <iframe width="560" height="315" src="https://www.youtube.com/embed/YcQ7PkH5qnI" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
 
 For my second milestone, I wired up a servo motor to my Arduino and organized the wires a bit. However, as soon as I transferred everything over to the Arduino R4, my fingerprint sensor stopped working, which I spent two weeks trying to fix. After that, I synced the Arduino R4 with Blynk so that I could open the lockbox from my phone (in case something goes wrong with the fingerprint sensor). How the Blynk system works is, there's a button in the app that's connected to a datastream, essentially a variable, on the website. When you click the button once, it changes the value of the datastream from 0 to 1 and sends a message to the Arduino, allowing the servo to rotate. When you click it again, the value changes back to 0, prompting it to rotate back to its initial position. For my final milestone, I plan to fix any bugs that still exist, add a switch to turn the box on and off without being connected to my computer, and drill everything into the actual box.
 
 # First Milestone
-
-**Don't forget to replace the text below with the embedding for your milestone video. Go to Youtube, click Share -> Embed, and copy and paste the code to replace what's below.**
 
 <iframe width="560" height="315" src="https://www.youtube.com/embed/g-cnZu8ZC8U" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
 
@@ -87,7 +75,7 @@ For my first milestone, I wired up a keypad, fingerprint sensor, and lcd to an A
 
 #define KEYPAD_PID3845 
 #define R2 4 
-#define R3 5 
+#define R3 5
 #define C3 6 
 #define R4 7 
 #define C1 8 
@@ -105,7 +93,7 @@ Adafruit_Fingerprint finger = Adafruit_Fingerprint(&Serial1);
 
 char auth[] = BLYNK_AUTH_TOKEN; 
 char ssid[] = "J11"; 
-char pass[] = "Blue@J11"; 
+char pass[] = "Blue@J11";
 String pwd = ""; 
 bool start_pressed = false; 
 bool password_authenticated = false; 
@@ -334,15 +322,16 @@ void permanently_locked() {
 
 | **Part** | **Note** | **Price** | **Link** |
 |:--:|:--:|:--:|:--:|
-| Arduino Uno | Used to relay code to the entire system | $20.70 | <a href="https://www.amazon.com/Arduino-A000066-ARDUINO-UNO-R3/dp/B008GRTSV6/"> Link </a> |
-| Breadboard | Used to wire devices to the Arduino | $8.99 | <a href="https://www.amazon.com/EL-CP-003-Breadboard-Solderless-Distribution-Connecting/dp/B01EV6LJ7G/"> Link </a> |
+| Arduino Uno R3 | Used to relay code to the fingerprint sensor and Uno R4 | $20.70 | <a href="https://www.amazon.com/Arduino-A000066-ARDUINO-UNO-R3/dp/B008GRTSV6/"> Link </a> |
+| Arduino Uno R4 | Used to relay code to the R3 and the rest of the system | $27.50 | <a href="https://www.amazon.com/Arduino-UNO-WiFi-ABX00087-Bluetooth/dp/B0C8V88Z9D/"> Link </a> |
+| Breadboard | Used to wire devices to the Arduinos | $8.99 | <a href="https://www.amazon.com/EL-CP-003-Breadboard-Solderless-Distribution-Connecting/dp/B01EV6LJ7G/"> Link </a> |
 | Keypad | Used to input the password | $6.50 | <a href="https://www.adafruit.com/product/3845?srsltid=AfmBOop0mFDCKUcpbJfNziJJQCqdIGndAFKcya28DPK7Vt_bTC7mqKFMPDg"> Link </a> |
 | Fingerprint Sensor | Used to scan user's fingerprint | €36,19 | <a href="https://www.amazon.com.be/-/en/Fingerprint-Identification-Capacitive-Recognition-Assistance/dp/B08GKY4RK1?language=en_GB"> Link </a> |
 | Liquid Crystal Display Screen | Used to display messages outputted from the code | $12.99 | <a href="https://www.amazon.com/Hosyond-Display-Module-Arduino-Raspberry/dp/B0BWTFN9WF/"> Link </a> |
 | Servo Motor | Used to open the lockbox | $13.98 | <a href="https://www.amazon.com/Deegoo-FPV-Servo-MG995-Metal-Gear/dp/B07NQJ1VZ2/"> Link </a> |
 | Switch | Used to turn the lockbox on and off | $6.39 | <a href="https://www.amazon.com/DaierTek-Listed-Switches-Automotive-KCD1-5Pack/dp/B07S1MV462/"> Link </a> |
-| Battery Holder | Used to hold AA batteries | $3.95 | <a href="https://www.amazon.com/Battery-Spring-Holder-Plastic-Storage/dp/B072FBL5HG/"> Link </a> |
-| AA Batteries | Used to power the lockbox | $6.49 | <a href="https://www.amazon.com/Amazon-Basics-Batteries-Leak-Free-Household/dp/B00O869KJE/"> Link </a> |
+| 9V Battery | Used to power the R3 | $3.95 | <a href="https://www.amazon.com/PKCELL-9V-Batteries-Battery-Detector/dp/B010N044YY/"> Link </a> |
+| Power Bank | Used to power the R4 | $6.49 | <a href="https://www.amazon.com/Miady-5000mAh-Portable-Charger-Android/dp/B08T8TDS8S/"> Link </a> |
 
 # Starter Project
 

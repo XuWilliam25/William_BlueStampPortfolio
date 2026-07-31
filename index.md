@@ -11,7 +11,7 @@ For my intensive project, I decided to build a lockbox to store my valuables. It
 
 <iframe width="560" height="315" src="https://www.youtube.com/embed/8KN960_h9_0" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
 
-For my final milestone, I drilled holes for the keypad, lcd screen, fingerprint sensor, switch, servo motor, and battery holders. I also rewired everything to two separate Arduinos to create a more stable power supply: an Arduino R3 is used to power the fingerprint sensor, which then sends data to the R4. The R4 receives data from the R3 and powers the rest of the system. Because the R4 powers the servo motor, it needs a significantly stronger power supply, which is why I used a power bank to power the R4. However, since the R3 only powers the fingerprint sensor, it only needs a 9V battery. This also required me to change my code, as the two Arduinos needed different codes to communicate with each other. The code for the Arduino R4 is attached below.
+For my final milestone, I drilled holes for the keypad, lcd screen, fingerprint sensor, switch, servo motor, and battery holders. I also rewired everything to two separate Arduinos to create a more stable power supply: an Arduino R3 is used to power the fingerprint sensor, which then sends data to the Arduino R4. The Arduino R4 receives data from the Arduino R3 and powers the rest of the system. Because the Arduino R4 powers the servo motor, it needs a significantly stronger power supply, which is why I used a power bank to power the Arduino R4. However, since the Arduino R3 only powers the fingerprint sensor, it only needs a 9V battery. This also required me to change my code, as the two Arduinos needed different codes to communicate with each other. The code for the Arduino R4 is attached below.
 
 # Second Milestone and Modifications
 
@@ -315,15 +315,15 @@ void permanently_locked() {
 | **Part** | **Note** | **Price** | **Link** |
 |:--:|:--:|:--:|:--:|
 | Arduino Uno R3 | Used to relay code to the fingerprint sensor and Uno R4 | $20.70 | <a href="https://www.amazon.com/Arduino-A000066-ARDUINO-UNO-R3/dp/B008GRTSV6/"> Link </a> |
-| Arduino Uno R4 | Used to relay code to the R3 and the rest of the system | $27.50 | <a href="https://www.amazon.com/Arduino-UNO-WiFi-ABX00087-Bluetooth/dp/B0C8V88Z9D/"> Link </a> |
+| Arduino Uno R4 | Used to relay code to the Arduino R3 and the rest of the system | $27.50 | <a href="https://www.amazon.com/Arduino-UNO-WiFi-ABX00087-Bluetooth/dp/B0C8V88Z9D/"> Link </a> |
 | Breadboard | Used to wire devices to the Arduinos | $8.99 | <a href="https://www.amazon.com/EL-CP-003-Breadboard-Solderless-Distribution-Connecting/dp/B01EV6LJ7G/"> Link </a> |
 | Keypad | Used to input the password | $6.50 | <a href="https://www.adafruit.com/product/3845?srsltid=AfmBOop0mFDCKUcpbJfNziJJQCqdIGndAFKcya28DPK7Vt_bTC7mqKFMPDg"> Link </a> |
 | Fingerprint Sensor | Used to scan user's fingerprint | €36,19 | <a href="https://www.amazon.com.be/-/en/Fingerprint-Identification-Capacitive-Recognition-Assistance/dp/B08GKY4RK1?language=en_GB"> Link </a> |
 | Liquid Crystal Display Screen | Used to display messages outputted from the code | $12.99 | <a href="https://www.amazon.com/Hosyond-Display-Module-Arduino-Raspberry/dp/B0BWTFN9WF/"> Link </a> |
 | Servo Motor | Used to open the lockbox | $13.98 | <a href="https://www.amazon.com/Deegoo-FPV-Servo-MG995-Metal-Gear/dp/B07NQJ1VZ2/"> Link </a> |
 | Switch | Used to reset the lockbox | $6.39 | <a href="https://www.amazon.com/DaierTek-Listed-Switches-Automotive-KCD1-5Pack/dp/B07S1MV462/"> Link </a> |
-| 9V Battery | Used to power the R3 | $4.99 | <a href="https://www.amazon.com/PKCELL-9V-Batteries-Battery-Detector/dp/B010N044YY/"> Link </a> |
-| Power Bank | Used to power the R4 | $14.99 | <a href="https://www.amazon.com/Miady-5000mAh-Portable-Charger-Android/dp/B08T8TDS8S/"> Link </a> |
+| 9V Battery | Used to power the Arduino R3 | $4.99 | <a href="https://www.amazon.com/PKCELL-9V-Batteries-Battery-Detector/dp/B010N044YY/"> Link </a> |
+| Power Bank | Used to power the Arduino R4 | $14.99 | <a href="https://www.amazon.com/Miady-5000mAh-Portable-Charger-Android/dp/B08T8TDS8S/"> Link </a> |
 
 # Starter Project
 

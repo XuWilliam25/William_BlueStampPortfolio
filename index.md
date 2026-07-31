@@ -1,17 +1,9 @@
-# BlueStamp Fingerprint ID Safe with Keypad
-For my intensive project, I decided to build a lockbox to store my valuables. It features a password keypad, fingerprint sensor, and mobile app. There are two ways to unlock the safe: either correctly enter the password and scan your fingerprint on the lockbox console, or use the face ID feature on your phone to directly unlock the safe.
-
-You should comment out all portions of your portfolio that you have not completed yet, as well as any instructions:
-```HTML 
-<!--- This is an HTML comment in Markdown -->
-<!--- Anything between these symbols will not render on the published site -->
-```
+# Keypad and Fingerprint Lockbox with App Verification
+For my intensive project, I decided to build a lockbox to store my valuables. It features a password keypad, fingerprint sensor, and mobile app. There are two ways to unlock the safe: correctly enter the password first, then either scan your finger or use the app to open the lockbox.
 
 | **Engineer** | **School** | **Area of Interest** | **Grade** |
 |:--:|:--:|:--:|:--:|
 | William X | Irvington High School | Electrical Engineering | Incoming Sophomore
-
-**Replace the BlueStamp logo below with an image of yourself and your completed project. Follow the guide [here](https://tomcam.github.io/least-github-pages/adding-images-github-pages-site.html) if you need help.**
 
 ![Headstone Image](photo.jpg)
   
@@ -19,13 +11,13 @@ You should comment out all portions of your portfolio that you have not complete
 
 <iframe width="560" height="315" src="https://www.youtube.com/embed/8KN960_h9_0" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
 
-For my final milestone, 
+For my final milestone, I drilled holes for the keypad, lcd screen, fingerprint sensor, switch, servo motor, and battery holders. I also rewired everything to two separate Arduinos to create a more stable power supply: an Arduino R3 is used to power the fingerprint sensor, which then sends data to the R4. The R4 receives data from the R3 and powers the rest of the system. Because the R4 powers the servo motor, it needs a significantly stronger power supply, which is why I used a power bank to power the R4. However, since the R3 only powers the fingerprint sensor, it only needs a 9V battery. This also required me to change my code, as the two Arduinos needed different codes to communicate with each other. The code for the Arduino R4 is attached below.
 
-# Second Milestone
+# Second Milestone and Modifications
 
 <iframe width="560" height="315" src="https://www.youtube.com/embed/YcQ7PkH5qnI" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
 
-For my second milestone, I wired up a servo motor to my Arduino and organized the wires a bit. However, as soon as I transferred everything over to the Arduino R4, my fingerprint sensor stopped working, which I spent two weeks trying to fix. After that, I synced the Arduino R4 with Blynk so that I could open the lockbox from my phone (in case something goes wrong with the fingerprint sensor). How the Blynk system works is, there's a button in the app that's connected to a datastream, essentially a variable, on the website. When you click the button once, it changes the value of the datastream from 0 to 1 and sends a message to the Arduino, allowing the servo to rotate. When you click it again, the value changes back to 0, prompting it to rotate back to its initial position. For my final milestone, I plan to fix any bugs that still exist, add a switch to turn the box on and off without being connected to my computer, and drill everything into the actual box.
+For my second milestone, I wired up a servo motor to my Arduino and organized the wires a bit. However, as soon as I transferred everything over to the Arduino R4, my fingerprint sensor stopped working, which I spent two weeks trying to fix. After that, I synced the Arduino R4 with Blynk so that I could open the lockbox from my phone in case something goes wrong with the fingerprint sensor again. How the Blynk system works is that there's a button in the app that controls a datastream, which is essentially a variable, on the Blynk server. When you click the button, it changes the value of the datastream from 0 to 1 and sends a message to the Arduino, telling the servo to rotate. When you click it again, the value goes back to 0, prompting the motor to rotate back to its locked position. For my final milestone, I plan to fix any bugs that still exist, add a switch to turn the box on and off without being connected to my computer, and drill everything into the actual box.
 
 # First Milestone
 

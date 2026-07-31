@@ -329,9 +329,9 @@ void permanently_locked() {
 | Fingerprint Sensor | Used to scan user's fingerprint | €36,19 | <a href="https://www.amazon.com.be/-/en/Fingerprint-Identification-Capacitive-Recognition-Assistance/dp/B08GKY4RK1?language=en_GB"> Link </a> |
 | Liquid Crystal Display Screen | Used to display messages outputted from the code | $12.99 | <a href="https://www.amazon.com/Hosyond-Display-Module-Arduino-Raspberry/dp/B0BWTFN9WF/"> Link </a> |
 | Servo Motor | Used to open the lockbox | $13.98 | <a href="https://www.amazon.com/Deegoo-FPV-Servo-MG995-Metal-Gear/dp/B07NQJ1VZ2/"> Link </a> |
-| Switch | Used to turn the lockbox on and off | $6.39 | <a href="https://www.amazon.com/DaierTek-Listed-Switches-Automotive-KCD1-5Pack/dp/B07S1MV462/"> Link </a> |
-| 9V Battery | Used to power the R3 | $3.95 | <a href="https://www.amazon.com/PKCELL-9V-Batteries-Battery-Detector/dp/B010N044YY/"> Link </a> |
-| Power Bank | Used to power the R4 | $6.49 | <a href="https://www.amazon.com/Miady-5000mAh-Portable-Charger-Android/dp/B08T8TDS8S/"> Link </a> |
+| Switch | Used to reset the lockbox | $6.39 | <a href="https://www.amazon.com/DaierTek-Listed-Switches-Automotive-KCD1-5Pack/dp/B07S1MV462/"> Link </a> |
+| 9V Battery | Used to power the R3 | $4.99 | <a href="https://www.amazon.com/PKCELL-9V-Batteries-Battery-Detector/dp/B010N044YY/"> Link </a> |
+| Power Bank | Used to power the R4 | $14.99 | <a href="https://www.amazon.com/Miady-5000mAh-Portable-Charger-Android/dp/B08T8TDS8S/"> Link </a> |
 
 # Starter Project
 
